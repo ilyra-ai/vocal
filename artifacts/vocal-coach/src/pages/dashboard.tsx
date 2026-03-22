@@ -10,11 +10,11 @@ export default function Dashboard() {
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <header className="mb-10">
-        <h1 className="text-4xl font-bold text-white mb-2">Welcome back, Artist.</h1>
-        <p className="text-muted-foreground text-lg">Ready to refine your voice today?</p>
+        <h1 className="text-4xl font-bold text-white mb-2">Bem-vindo de volta, Artista.</h1>
+        <p className="text-muted-foreground text-lg">Pronto para aperfeiçoar sua voz hoje?</p>
       </header>
 
-      {/* Hero Action Card */}
+      {/* Card de Ação Principal */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -23,7 +23,7 @@ export default function Dashboard() {
         <div className="absolute inset-0 z-0">
           <img 
             src={`${import.meta.env.BASE_URL}images/hero-bg.png`} 
-            alt="Hero Background" 
+            alt="Fundo Hero" 
             className="w-full h-full object-cover opacity-80"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
@@ -32,26 +32,26 @@ export default function Dashboard() {
         <div className="relative z-10 p-10 md:p-14 md:w-2/3">
           <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary text-sm font-medium mb-6 backdrop-blur-md">
             <Activity className="w-4 h-4 mr-2" />
-            Studio is ready
+            Estúdio pronto
           </div>
           <h2 className="text-3xl md:text-5xl font-display font-bold text-white mb-4 leading-tight">
-            Perfect your pitch with <br/><span className="text-gradient">AI Analysis</span>
+            Afine sua voz com <br/><span className="text-gradient">Análise por IA</span>
           </h2>
           <p className="text-lg text-white/80 mb-8 max-w-lg">
-            Record your voice and get instant, PhD-level feedback on intonation, breath support, and resonance.
+            Grave sua voz e receba feedback instantâneo em nível de PhD sobre entonação, suporte de ar e ressonância.
           </p>
           <Link href="/studio" className="inline-flex items-center px-8 py-4 rounded-xl font-bold text-white bg-primary hover:bg-primary/90 shadow-lg shadow-primary/30 transition-all hover:scale-105 active:scale-95">
             <Mic2 className="w-5 h-5 mr-2" />
-            Enter Studio
+            Entrar no Estúdio
           </Link>
         </div>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        {/* Stats Cards */}
+        {/* Cartões de Estatísticas */}
         <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-muted-foreground font-medium">Avg. Pitch Accuracy</h3>
+            <h3 className="text-muted-foreground font-medium">Precisão de Tom Média</h3>
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
               <Activity className="w-5 h-5" />
             </div>
@@ -62,14 +62,14 @@ export default function Dashboard() {
             </div>
             <div className="text-sm text-primary mt-2 flex items-center">
               <TrendingUp className="w-4 h-4 mr-1" />
-              <span>+2.4% this week</span>
+              <span>+2,4% esta semana</span>
             </div>
           </div>
         </div>
 
         <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-muted-foreground font-medium">Total Sessions</h3>
+            <h3 className="text-muted-foreground font-medium">Total de Sessões</h3>
             <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
               <Music className="w-5 h-5" />
             </div>
@@ -79,24 +79,24 @@ export default function Dashboard() {
               {isProfileLoading ? "..." : profile?.totalSessions || 0}
             </div>
             <div className="text-sm text-muted-foreground mt-2">
-              Practice makes perfect
+              A prática leva à perfeição
             </div>
           </div>
         </div>
 
         <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-muted-foreground font-medium">Current Level</h3>
+            <h3 className="text-muted-foreground font-medium">Nível Atual</h3>
             <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
           <div>
             <div className="text-3xl font-display font-bold text-white capitalize">
-              {isProfileLoading ? "..." : profile?.skillLevel || "Beginner"}
+              {isProfileLoading ? "..." : profile?.skillLevel || "Iniciante"}
             </div>
             <div className="text-sm text-muted-foreground mt-2">
-              Keep pushing to the next tier
+              Continue evoluindo para o próximo nível
             </div>
           </div>
         </div>
@@ -104,19 +104,19 @@ export default function Dashboard() {
 
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">Recent Sessions</h2>
-          <Link href="/sessions" className="text-primary hover:text-primary/80 font-medium">View All</Link>
+          <h2 className="text-2xl font-bold text-white">Sessões Recentes</h2>
+          <Link href="/sessions" className="text-primary hover:text-primary/80 font-medium">Ver Todas</Link>
         </div>
         
         {isSessionsLoading ? (
-          <div className="text-center py-10 text-muted-foreground">Loading sessions...</div>
+          <div className="text-center py-10 text-muted-foreground">Carregando sessões...</div>
         ) : sessions?.length === 0 ? (
           <div className="text-center py-12 glass-panel rounded-2xl">
             <Music className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <p className="text-lg text-white font-medium">No sessions yet</p>
-            <p className="text-muted-foreground mb-6">Start your first recording to see history here.</p>
+            <p className="text-lg text-white font-medium">Nenhuma sessão ainda</p>
+            <p className="text-muted-foreground mb-6">Inicie sua primeira gravação para ver o histórico aqui.</p>
             <Link href="/studio" className="inline-flex px-6 py-3 rounded-xl bg-secondary text-white hover:bg-secondary/80 font-medium transition-colors">
-              Create Session
+              Criar Sessão
             </Link>
           </div>
         ) : (
@@ -138,8 +138,8 @@ export default function Dashboard() {
                   {session.targetSong && <p className="text-sm text-muted-foreground mb-4">🎵 {session.targetSong}</p>}
                   
                   <div className="pt-4 border-t border-border mt-auto flex justify-between items-center text-sm text-muted-foreground">
-                    <span>{session.recordingCount} recordings</span>
-                    <span>{new Date(session.createdAt).toLocaleDateString()}</span>
+                    <span>{session.recordingCount} gravações</span>
+                    <span>{new Date(session.createdAt).toLocaleDateString("pt-BR")}</span>
                   </div>
                 </div>
               </Link>

@@ -12,11 +12,11 @@ export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
 
   const navItems = [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/" },
-    { icon: Mic2, label: "Studio", href: "/studio" },
-    { icon: History, label: "Sessions", href: "/sessions" },
-    { icon: User, label: "Profile", href: "/profile" },
-    { icon: MessageSquare, label: "AI Coach", href: "/chat" },
+    { icon: LayoutDashboard, label: "Painel", href: "/" },
+    { icon: Mic2, label: "Estúdio", href: "/studio" },
+    { icon: History, label: "Sessões", href: "/sessions" },
+    { icon: User, label: "Perfil", href: "/profile" },
+    { icon: MessageSquare, label: "Coach IA", href: "/chat" },
   ];
 
   return (
@@ -54,19 +54,18 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="p-4 border-t border-sidebar-border">
           <div className="flex items-center p-3 rounded-xl bg-sidebar-accent/50">
             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 mr-3 overflow-hidden">
-              <img src={`${import.meta.env.BASE_URL}images/avatar-placeholder.png`} alt="User" className="w-full h-full object-cover" />
+              <img src={`${import.meta.env.BASE_URL}images/avatar-placeholder.png`} alt="Usuário" className="w-full h-full object-cover" />
             </div>
             <div>
-              <p className="text-sm font-medium text-white">Vocal Artist</p>
-              <p className="text-xs text-sidebar-foreground/60">Pro Plan</p>
+              <p className="text-sm font-medium text-white">Artista Vocal</p>
+              <p className="text-xs text-sidebar-foreground/60">Plano Pro</p>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Conteúdo Principal */}
       <main className="flex-1 flex flex-col relative z-10 overflow-hidden">
-        {/* Top decorative gradient glow */}
         <div className="absolute top-0 inset-x-0 h-96 bg-primary/5 blur-[120px] pointer-events-none -z-10 rounded-full mix-blend-screen translate-y-[-50%]" />
         
         <div className="flex-1 overflow-y-auto">

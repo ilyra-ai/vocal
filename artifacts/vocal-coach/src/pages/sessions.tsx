@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Plus, Music, Search } from "lucide-react";
 import { useListVocalSessions, useCreateVocalSession } from "@workspace/api-client-react";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
 
 export default function Sessions() {
@@ -11,7 +12,7 @@ export default function Sessions() {
   const createSession = useCreateVocalSession();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({ title: "", genre: "Pop", targetSong: "", skillLevel: "Intermediate" });
+  const [formData, setFormData] = useState({ title: "", genre: "Pop", targetSong: "", skillLevel: "Intermediário" });
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,15 +30,15 @@ export default function Sessions() {
     <div className="p-8 max-w-7xl mx-auto h-full flex flex-col">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Sessions</h1>
-          <p className="text-muted-foreground mt-1">Manage and review your practice history</p>
+          <h1 className="text-3xl font-bold text-white">Sessões</h1>
+          <p className="text-muted-foreground mt-1">Gerencie e revise seu histórico de prática</p>
         </div>
         <button 
           onClick={() => setIsDialogOpen(true)}
           className="flex items-center px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-transform active:scale-95"
         >
           <Plus className="w-5 h-5 mr-2" />
-          New Session
+          Nova Sessão
         </button>
       </div>
 
@@ -45,13 +46,13 @@ export default function Sessions() {
         <Search className="w-5 h-5 text-muted-foreground ml-3 mr-2" />
         <input 
           type="text"
-          placeholder="Search sessions..."
+          placeholder="Buscar sessões..."
           className="bg-transparent border-none outline-none text-white w-full py-2 placeholder:text-muted-foreground"
         />
       </div>
 
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center text-muted-foreground">Loading...</div>
+        <div className="flex-1 flex items-center justify-center text-muted-foreground">Carregando...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {sessions?.map((session, i) => (
@@ -79,8 +80,8 @@ export default function Sessions() {
                   )}
                   
                   <div className="mt-auto pt-4 border-t border-border flex justify-between items-center text-xs text-muted-foreground">
-                    <span>{format(new Date(session.createdAt), "MMM d, yyyy")}</span>
-                    <span>{session.recordingCount} takes</span>
+                    <span>{format(new Date(session.createdAt), "d 'de' MMM, yyyy", { locale: ptBR })}</span>
+                    <span>{session.recordingCount} gravações</span>
                   </div>
                 </div>
               </Link>
@@ -89,7 +90,7 @@ export default function Sessions() {
         </div>
       )}
 
-      {/* Simple Create Dialog */}
+      {/* Diálogo de Criação */}
       {isDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <motion.div 
@@ -97,37 +98,49 @@ export default function Sessions() {
             animate={{ scale: 1, opacity: 1 }}
             className="glass-panel w-full max-w-md rounded-3xl p-8"
           >
-            <h2 className="text-2xl font-bold text-white mb-6">Create New Session</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Criar Nova Sessão</h2>
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Session Title</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Título da Sessão</label>
                 <input 
                   required
                   value={formData.title}
                   onChange={e => setFormData({...formData, title: e.target.value})}
                   className="w-full bg-input border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" 
-                  placeholder="e.g. High Note Practice" 
+                  placeholder="ex.: Prática de Notas Altas" 
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Genre</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Gênero</label>
                 <select 
                   value={formData.genre}
                   onChange={e => setFormData({...formData, genre: e.target.value})}
                   className="w-full bg-input border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
-                  {['Pop', 'Classical', 'Jazz', 'Opera', 'Rock', 'R&B', 'Musical Theatre'].map(g => (
+                  {['Pop', 'Clássico', 'Jazz', 'Ópera', 'Rock', 'R&B', 'Teatro Musical', 'MPB', 'Sertanejo', 'Forró'].map(g => (
                     <option key={g} value={g}>{g}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Target Song (Optional)</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Nível de Habilidade</label>
+                <select
+                  value={formData.skillLevel}
+                  onChange={e => setFormData({...formData, skillLevel: e.target.value})}
+                  className="w-full bg-input border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                >
+                  {['Iniciante', 'Intermediário', 'Avançado', 'Profissional'].map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Música-Alvo (Opcional)</label>
                 <input 
                   value={formData.targetSong}
                   onChange={e => setFormData({...formData, targetSong: e.target.value})}
                   className="w-full bg-input border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" 
-                  placeholder="e.g. Bohemian Rhapsody" 
+                  placeholder="ex.: Evidências – Chitãozinho & Xororó" 
                 />
               </div>
               <div className="pt-4 flex gap-3">
@@ -136,14 +149,14 @@ export default function Sessions() {
                   onClick={() => setIsDialogOpen(false)}
                   className="flex-1 py-3 px-4 rounded-xl bg-secondary text-white font-medium hover:bg-secondary/80"
                 >
-                  Cancel
+                  Cancelar
                 </button>
                 <button 
                   type="submit" 
                   disabled={createSession.isPending}
                   className="flex-1 py-3 px-4 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {createSession.isPending ? "Creating..." : "Create"}
+                  {createSession.isPending ? "Criando..." : "Criar"}
                 </button>
               </div>
             </form>

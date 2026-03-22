@@ -9,7 +9,7 @@ interface Message {
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: "Hello! I'm your AI vocal coach. I've been reviewing your sessions. Do you have any questions about breath support, repertoire, or specific vocal techniques?" }
+    { role: 'assistant', content: "Olá! Sou sua coach vocal por IA. Estive revisando suas sessões. Tem alguma dúvida sobre suporte de ar, repertório ou técnicas vocais específicas?" }
   ]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -32,11 +32,6 @@ export default function Chat() {
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setIsStreaming(true);
 
-    // Placeholder for actual API call, assuming conversation ID 1 exists or creating one.
-    // In a real flow, we'd use useCreateOpenaiConversation first if needed.
-    // For this UI, we will mock the SSE stream structure since we don't have a guaranteed ID here.
-    
-    // Fallback Mock Stream if no real backend:
     setMessages(prev => [...prev, { role: 'assistant', content: "" }]);
     
     try {
@@ -46,7 +41,7 @@ export default function Chat() {
         body: JSON.stringify({ content: userMsg })
       });
 
-      if (!response.ok) throw new Error("API failed");
+      if (!response.ok) throw new Error("API falhou");
       
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
@@ -74,8 +69,7 @@ export default function Chat() {
         }
       }
     } catch (e) {
-      // Mock typing if API fails (which it will if backend isn't up)
-      const mockText = "As an expert vocal coach, I recommend focusing on diaphragmatic breathing. Try the 'hissing' exercise: inhale deeply for 4 seconds, then release the air on an 'S' sound for as long as possible.";
+      const mockText = "Como especialista em pedagogia vocal, recomendo focar na respiração diafragmática. Experimente o exercício do 'chiado': inspire profundamente por 4 segundos e libere o ar em um som 'S' por o maior tempo possível.";
       for (let i = 0; i < mockText.length; i++) {
         await new Promise(r => setTimeout(r, 20));
         setMessages(prev => {
@@ -90,10 +84,10 @@ export default function Chat() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto h-[calc(100vh-2rem)] flex flex-col">
-      <h1 className="text-3xl font-bold text-white mb-6">AI Vocal Coach</h1>
+      <h1 className="text-3xl font-bold text-white mb-6">Coach Vocal por IA</h1>
       
       <div className="flex-1 glass-panel rounded-3xl overflow-hidden flex flex-col border-card-border/50 shadow-2xl">
-        {/* Messages Area */}
+        {/* Área de Mensagens */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.map((msg, i) => (
             <motion.div 
@@ -115,7 +109,7 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
+        {/* Área de Entrada */}
         <div className="p-4 border-t border-border bg-card/50">
           <form onSubmit={handleSubmit} className="relative">
             <input 
@@ -123,7 +117,7 @@ export default function Chat() {
               value={input}
               onChange={e => setInput(e.target.value)}
               disabled={isStreaming}
-              placeholder="Ask about vocal techniques..."
+              placeholder="Pergunte sobre técnicas vocais..."
               className="w-full bg-input border border-border rounded-xl pl-6 pr-14 py-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
             />
             <button 

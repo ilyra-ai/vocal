@@ -19,7 +19,6 @@ export default function Studio() {
 
   const [duration, setDuration] = useState(0);
 
-  // Timer
   useEffect(() => {
     let interval: any;
     if (isRecording) {
@@ -34,7 +33,7 @@ export default function Studio() {
     if (audioBlob && selectedSession) {
       startAnalysis(parseInt(selectedSession, 10), audioBlob, duration);
     } else if (!selectedSession) {
-      alert("Please select a session to save to first.");
+      alert("Selecione uma sessão antes de analisar.");
     }
   };
 
@@ -47,13 +46,13 @@ export default function Studio() {
   return (
     <div className="p-8 max-w-5xl mx-auto min-h-full flex flex-col">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-white">Recording Studio</h1>
+        <h1 className="text-3xl font-bold text-white">Estúdio de Gravação</h1>
         <select 
           value={selectedSession}
           onChange={(e) => setSelectedSession(e.target.value)}
           className="bg-card border border-border text-white px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
         >
-          <option value="" disabled>Select Session...</option>
+          <option value="" disabled>Selecionar Sessão...</option>
           {sessions?.map(s => (
             <option key={s.id} value={s.id.toString()}>{s.title}</option>
           ))}
@@ -61,7 +60,7 @@ export default function Studio() {
       </div>
 
       <div className="flex-1 glass-panel rounded-3xl overflow-hidden flex flex-col relative border-card-border/50">
-        {/* Visualizer Area */}
+        {/* Área do Visualizador */}
         <div className="flex-1 relative flex flex-col items-center justify-center bg-background/50 p-8 min-h-[300px]">
           <canvas 
             ref={canvasRef} 
@@ -71,14 +70,14 @@ export default function Studio() {
           />
           
           <div className="absolute top-8 left-8">
-            <div className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-1">Time</div>
+            <div className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-1">Tempo</div>
             <div className="text-4xl font-display font-bold text-white font-variant-numeric: tabular-nums">
               {formatTime(duration)}
             </div>
           </div>
 
           <div className="absolute top-8 right-8 text-right">
-            <div className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-1">Pitch</div>
+            <div className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-1">Tom</div>
             <div className="text-4xl font-display font-bold text-primary">
               {currentPitch ? currentPitch.note : "--"}
             </div>
@@ -86,7 +85,7 @@ export default function Studio() {
           </div>
         </div>
 
-        {/* Controls */}
+        {/* Controles */}
         <div className="p-8 border-t border-border bg-card/40 flex justify-center items-center gap-6">
           {!isRecording && !audioBlob && (
             <button 
@@ -109,10 +108,10 @@ export default function Studio() {
           {audioBlob && !isRecording && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex gap-4">
               <button 
-                onClick={() => window.location.reload()} // Hack to reset state quickly
+                onClick={() => window.location.reload()}
                 className="px-6 py-4 rounded-2xl bg-secondary text-white font-medium hover:bg-secondary/80 transition-colors flex items-center"
               >
-                <X className="w-5 h-5 mr-2" /> Discard
+                <X className="w-5 h-5 mr-2" /> Descartar
               </button>
               <button 
                 onClick={handleAnalyze}
@@ -120,9 +119,9 @@ export default function Studio() {
                 className="px-8 py-4 rounded-2xl bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/30 transition-all flex items-center disabled:opacity-50"
               >
                 {isAnalyzing ? (
-                  <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Analyzing...</>
+                  <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Analisando...</>
                 ) : (
-                  <><Save className="w-5 h-5 mr-2" /> Analyze & Save</>
+                  <><Save className="w-5 h-5 mr-2" /> Analisar e Salvar</>
                 )}
               </button>
             </motion.div>
@@ -130,7 +129,7 @@ export default function Studio() {
         </div>
       </div>
 
-      {/* Analysis Overlay */}
+      {/* Painel de Análise */}
       <AnimatePresence>
         {(isAnalyzing || analysisComplete || analysisText) && (
           <motion.div 
@@ -142,18 +141,18 @@ export default function Studio() {
               <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary mr-4">
                 {isAnalyzing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Mic className="w-5 h-5" />}
               </div>
-              <h3 className="text-xl font-bold text-white">AI Vocal Analysis</h3>
+              <h3 className="text-xl font-bold text-white">Análise Vocal por IA</h3>
             </div>
             
             <div className="prose prose-invert max-w-none text-muted-foreground font-mono text-sm whitespace-pre-wrap bg-background/50 p-6 rounded-xl border border-border h-64 overflow-y-auto">
-              {analysisText || "Waiting for stream to begin..."}
+              {analysisText || "Aguardando início da análise..."}
               {isAnalyzing && <span className="inline-block w-2 h-4 ml-1 bg-primary animate-pulse" />}
             </div>
 
             {analysisComplete && (
               <div className="mt-6 flex justify-end">
                 <a href={`/sessions/${selectedSession}`} className="px-6 py-3 rounded-xl bg-secondary text-white font-medium hover:bg-secondary/80">
-                  View Full Results
+                  Ver Resultados Completos
                 </a>
               </div>
             )}
