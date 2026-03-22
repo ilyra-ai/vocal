@@ -1,0 +1,21 @@
+packages:
+  "framer-motion": "For premium page transitions and micro-interactions"
+  "recharts": "For visualizing pitch data and performance trends"
+  "date-fns": "For human-readable date formatting in session lists"
+  "lucide-react": "For iconography"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility for cleanly merging tailwind classes"
+
+images:
+  - path: "artifacts/vocal-coach/public/images/hero-bg.png"
+    description: "Abstract soundwave gradient mesh in deep dark blue and vivid purple, high tech, premium studio feel, subtle glowing particles"
+    aspect_ratio: "16:9"
+  - path: "artifacts/vocal-coach/public/images/avatar-placeholder.png"
+    description: "Minimalist glowing neon silhouette of a singer with a microphone, dark background, premium"
+    aspect_ratio: "1:1"
+
+notes:
+  - "App uses Web Audio API for real-time waveform and pitch detection."
+  - "Requires microphone permissions from the browser."
+  - "SSE endpoints use standard fetch with ReadableStream to bypass EventSource POST limitations."
+  - "Assuming generated hooks from @workspace/api-client-react are available."

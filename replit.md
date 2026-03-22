@@ -1,8 +1,8 @@
-# Workspace
+# VocalCoach AI
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+A professional PhD-level AI singing coaching application. Records the user's voice via the browser microphone, performs real-time audio analysis using Web Audio API, and sends the audio data to a GPT-5.2 AI acting as Dr. Elena Voce — a doctoral-level vocal pedagogy expert — who provides personalized, expert-level feedback on pitch accuracy, intonation, breath support, vibrato, and timing.
 
 ## Stack
 
@@ -10,87 +10,83 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Node.js version**: 24
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
-- **API framework**: Express 5
+- **Frontend**: React + Vite (artifacts/vocal-coach)
+- **API framework**: Express 5 (artifacts/api-server)
 - **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
+- **AI**: Replit AI Integrations → OpenAI gpt-5.2
+- **Validation**: Zod, drizzle-zod
 - **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+- **Build**: esbuild (ESM bundle)
 
 ## Structure
 
 ```text
 artifacts-monorepo/
-├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
-├── lib/                    # Shared libraries
+├── artifacts/
+│   ├── api-server/         # Express 5 API server
+│   └── vocal-coach/        # React + Vite frontend (at "/" preview path)
+├── lib/
 │   ├── api-spec/           # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/   # Generated React Query hooks
 │   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
-├── scripts/                # Utility scripts (single workspace package)
-│   └── src/                # Individual .ts scripts, run via `pnpm --filter @workspace/scripts run <script>`
-├── pnpm-workspace.yaml     # pnpm workspace (artifacts/*, lib/*, lib/integrations/*, scripts)
-├── tsconfig.base.json      # Shared TS options (composite, bundler resolution, es2022)
-├── tsconfig.json           # Root TS project references
-└── package.json            # Root package with hoisted devDeps
+│   ├── db/                 # Drizzle ORM schema + DB connection
+│   ├── integrations-openai-ai-server/  # OpenAI server-side client
+│   └── integrations-openai-ai-react/   # OpenAI React hooks
+├── scripts/                # Utility scripts
+├── pnpm-workspace.yaml
+├── tsconfig.base.json
+├── tsconfig.json
+└── package.json
 ```
+
+## Database Schema
+
+- `vocal_sessions` — Practice sessions with genre, target song, skill level, overall score
+- `vocal_recordings` — Individual recordings with pitch analysis scores (accuracy, intonation, breath, vibrato, timing)
+- `vocal_profile` — User's cumulative profile (strengths, areas to improve, progress trend)
+- `conversations` — AI coach chat conversation threads
+- `messages` — Individual chat messages
+
+## API Routes
+
+- `GET/POST /api/vocal-coach/sessions` — List/create sessions
+- `GET/DELETE /api/vocal-coach/sessions/:id` — Get/delete session with recordings
+- `POST /api/vocal-coach/sessions/:id/analyze` — Submit audio for AI analysis (SSE stream)
+- `GET /api/vocal-coach/sessions/:id/recordings` — List recordings
+- `GET/PUT /api/vocal-coach/profile` — Vocal profile management
+- `GET/POST /api/openai/conversations` — Conversation management
+- `POST /api/openai/conversations/:id/messages` — AI chat (SSE stream)
+
+## AI Analysis
+
+The AI coach `Dr. Elena Voce` is prompted as a Juilliard PhD with expertise in:
+- Vocal physiology (laryngeal mechanics, phonation types)
+- Acoustic physics (formant tracking, spectral analysis)
+- Breath management (appoggio technique, sub-glottal pressure)
+- Register transitions (passaggio, cover technique)
+- Style-specific technique (opera, pop, jazz, rock, R&B, etc.)
+- Vibrato mechanics and vocal health
+
+Analysis output includes:
+- Executive Summary
+- Pitch & Intonation Assessment
+- Breath Management & Phonation
+- Resonance & Tone Quality
+- Technical Issues (numbered)
+- Personalized Exercise Protocol (with specific pitches/durations)
+- Prognosis & Next Session Focus
 
 ## TypeScript & Composite Projects
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references. This means:
+Every package extends `tsconfig.base.json` (composite: true). Root `tsconfig.json` lists all libs as project references.
 
-- **Always typecheck from the root** — run `pnpm run typecheck` (which runs `tsc --build --emitDeclarationOnly`). This builds the full dependency graph so that cross-package imports resolve correctly. Running `tsc` inside a single package will fail if its dependencies haven't been built yet.
-- **`emitDeclarationOnly`** — we only emit `.d.ts` files during typecheck; actual JS bundling is handled by esbuild/tsx/vite...etc, not `tsc`.
-- **Project references** — when package A depends on package B, A's `tsconfig.json` must list B in its `references` array. `tsc --build` uses this to determine build order and skip up-to-date packages.
+- Always typecheck from root: `pnpm run typecheck`
+- After spec changes: `pnpm --filter @workspace/api-spec run codegen`
+- DB migrations: `pnpm --filter @workspace/db run push`
 
-## Root Scripts
+## Key Notes
 
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
-
-## Packages
-
-### `artifacts/api-server` (`@workspace/api-server`)
-
-Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` for request and response validation and `@workspace/db` for persistence.
-
-- Entry: `src/index.ts` — reads `PORT`, starts Express
-- App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
-- Depends on: `@workspace/db`, `@workspace/api-zod`
-- `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
-- Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
-
-### `lib/db` (`@workspace/db`)
-
-Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client instance and schema models.
-
-- `src/index.ts` — creates a `Pool` + Drizzle instance, exports schema
-- `src/schema/index.ts` — barrel re-export of all models
-- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas (no models definitions exist right now)
-- `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
-- Exports: `.` (pool, db, schema), `./schema` (schema only)
-
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
-
-### `lib/api-spec` (`@workspace/api-spec`)
-
-Owns the OpenAPI 3.1 spec (`openapi.yaml`) and the Orval config (`orval.config.ts`). Running codegen produces output into two sibling packages:
-
-1. `lib/api-client-react/src/generated/` — React Query hooks + fetch client
-2. `lib/api-zod/src/generated/` — Zod schemas
-
-Run codegen: `pnpm --filter @workspace/api-spec run codegen`
-
-### `lib/api-zod` (`@workspace/api-zod`)
-
-Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used by `api-server` for response validation.
-
-### `lib/api-client-react` (`@workspace/api-client-react`)
-
-Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
-
-### `scripts` (`@workspace/scripts`)
-
-Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+- Audio payloads: Express body limit is 50MB
+- Pitch analysis: Client-side Web Audio API (AnalyserNode) sends pitch time-series to backend
+- SSE streaming: Both analysis and chat use SSE (not EventSource - uses fetch + ReadableStream)
+- AI integration: Replit AI Integrations proxy (no API key needed, billed to Replit credits)

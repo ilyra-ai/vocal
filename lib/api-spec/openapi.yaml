@@ -3,13 +3,17 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: VocalCoach AI API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: openai
+    description: OpenAI AI chat, image, and audio operations
+  - name: vocal-coach
+    description: Vocal coaching sessions and analysis
 paths:
   /healthz:
     get:
@@ -24,6 +28,292 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /openai/conversations:
+    get:
+      operationId: listOpenaiConversations
+      tags: [openai]
+      summary: List all conversations
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenaiConversation"
+    post:
+      operationId: createOpenaiConversation
+      tags: [openai]
+      summary: Create a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOpenaiConversationBody"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversation"
+  /openai/conversations/{id}:
+    get:
+      operationId: getOpenaiConversation
+      tags: [openai]
+      summary: Get conversation with messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversationWithMessages"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiError"
+    delete:
+      operationId: deleteOpenaiConversation
+      tags: [openai]
+      summary: Delete a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiError"
+  /openai/conversations/{id}/messages:
+    get:
+      operationId: listOpenaiMessages
+      tags: [openai]
+      summary: List messages in a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenaiMessage"
+    post:
+      operationId: sendOpenaiMessage
+      tags: [openai]
+      summary: Send a text message and receive a streaming text response
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOpenaiMessageBody"
+      responses:
+        "200":
+          description: SSE stream of assistant text chunks
+          content:
+            text/event-stream: {}
+  /openai/conversations/{id}/voice-messages:
+    post:
+      operationId: sendOpenaiVoiceMessage
+      tags: [openai]
+      summary: Send audio and receive a streaming voice response
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOpenaiVoiceMessageBody"
+      responses:
+        "200":
+          description: SSE stream of transcript and audio chunks
+          content:
+            text/event-stream: {}
+
+  /vocal-coach/sessions:
+    get:
+      operationId: listVocalSessions
+      tags: [vocal-coach]
+      summary: List all vocal coaching sessions
+      responses:
+        "200":
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VocalSession"
+    post:
+      operationId: createVocalSession
+      tags: [vocal-coach]
+      summary: Create a new vocal coaching session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVocalSessionBody"
+      responses:
+        "201":
+          description: Created session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VocalSession"
+
+  /vocal-coach/sessions/{id}:
+    get:
+      operationId: getVocalSession
+      tags: [vocal-coach]
+      summary: Get a vocal session with all recordings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session with recordings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VocalSessionWithRecordings"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiError"
+    delete:
+      operationId: deleteVocalSession
+      tags: [vocal-coach]
+      summary: Delete a vocal session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /vocal-coach/sessions/{id}/analyze:
+    post:
+      operationId: analyzeVocalRecording
+      tags: [vocal-coach]
+      summary: Submit audio recording for AI analysis
+      description: |
+        Accepts base64-encoded audio, performs pitch analysis, and streams back
+        a personalized expert-level vocal coaching analysis via SSE.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeVocalRecordingBody"
+      responses:
+        "200":
+          description: SSE stream of AI analysis chunks and final structured result
+          content:
+            text/event-stream: {}
+
+  /vocal-coach/sessions/{id}/recordings:
+    get:
+      operationId: listVocalRecordings
+      tags: [vocal-coach]
+      summary: List recordings for a session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of recordings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VocalRecording"
+
+  /vocal-coach/profile:
+    get:
+      operationId: getVocalProfile
+      tags: [vocal-coach]
+      summary: Get the user's vocal profile (computed from all sessions)
+      responses:
+        "200":
+          description: Vocal profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VocalProfile"
+    put:
+      operationId: updateVocalProfile
+      tags: [vocal-coach]
+      summary: Update the user's vocal profile preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateVocalProfileBody"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VocalProfile"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +324,333 @@ components:
       required:
         - status
 
+    OpenaiConversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - createdAt
+    OpenaiMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+    CreateOpenaiConversationBody:
+      type: object
+      properties:
+        title:
+          type: string
+      required:
+        - title
+    SendOpenaiMessageBody:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
+    SendOpenaiVoiceMessageBody:
+      type: object
+      properties:
+        audio:
+          type: string
+          description: Base64-encoded audio data
+      required:
+        - audio
+    OpenaiConversationWithMessages:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpenaiMessage"
+      required:
+        - id
+        - title
+        - createdAt
+        - messages
+    OpenaiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    VocalSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        genre:
+          type: string
+          description: Musical genre the user is practicing (pop, classical, jazz, opera, rock, etc.)
+        targetSong:
+          type: string
+          nullable: true
+          description: Song the user is attempting to sing
+        voiceType:
+          type: string
+          nullable: true
+          description: Vocal type identified (soprano, alto, tenor, baritone, bass, etc.)
+        skillLevel:
+          type: string
+          description: Self-reported or AI-assessed skill level
+        recordingCount:
+          type: integer
+        overallScore:
+          type: number
+          nullable: true
+          description: Overall pitch accuracy score 0-100
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - genre
+        - skillLevel
+        - recordingCount
+        - createdAt
+        - updatedAt
+
+    VocalSessionWithRecordings:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        genre:
+          type: string
+        targetSong:
+          type: string
+          nullable: true
+        voiceType:
+          type: string
+          nullable: true
+        skillLevel:
+          type: string
+        overallScore:
+          type: number
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        recordings:
+          type: array
+          items:
+            $ref: "#/components/schemas/VocalRecording"
+      required:
+        - id
+        - title
+        - genre
+        - skillLevel
+        - createdAt
+        - updatedAt
+        - recordings
+
+    VocalRecording:
+      type: object
+      properties:
+        id:
+          type: integer
+        sessionId:
+          type: integer
+        durationSeconds:
+          type: number
+        pitchAccuracyScore:
+          type: number
+          nullable: true
+          description: Pitch accuracy 0-100
+        intonationScore:
+          type: number
+          nullable: true
+          description: Intonation stability 0-100
+        breathSupportScore:
+          type: number
+          nullable: true
+          description: Breath support quality 0-100
+        vibratoScore:
+          type: number
+          nullable: true
+          description: Vibrato consistency 0-100
+        timingScore:
+          type: number
+          nullable: true
+          description: Rhythmic accuracy 0-100
+        dominantPitchHz:
+          type: number
+          nullable: true
+          description: Most prominent fundamental frequency detected
+        estimatedNote:
+          type: string
+          nullable: true
+          description: Closest musical note to dominant pitch
+        pitchData:
+          type: string
+          nullable: true
+          description: JSON array of time-frequency data points for visualization
+        aiAnalysis:
+          type: string
+          nullable: true
+          description: Full AI expert analysis text
+        keyIssues:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Specific issues identified
+        recommendations:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Personalized exercises and techniques recommended
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - sessionId
+        - durationSeconds
+        - createdAt
+
+    CreateVocalSessionBody:
+      type: object
+      properties:
+        title:
+          type: string
+        genre:
+          type: string
+        targetSong:
+          type: string
+          nullable: true
+        skillLevel:
+          type: string
+      required:
+        - title
+        - genre
+        - skillLevel
+
+    AnalyzeVocalRecordingBody:
+      type: object
+      properties:
+        audio:
+          type: string
+          description: Base64-encoded audio data (WebM/WAV)
+        durationSeconds:
+          type: number
+        targetNote:
+          type: string
+          nullable: true
+          description: Note the user was attempting to sing
+        exerciseType:
+          type: string
+          nullable: true
+          description: Type of exercise (scale, song, vowel drill, etc.)
+      required:
+        - audio
+        - durationSeconds
+
+    VocalProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        preferredGenres:
+          type: array
+          items:
+            type: string
+        voiceType:
+          type: string
+          nullable: true
+        skillLevel:
+          type: string
+          nullable: true
+        totalSessions:
+          type: integer
+        totalRecordings:
+          type: integer
+        averagePitchAccuracy:
+          type: number
+          nullable: true
+        progressTrend:
+          type: string
+          nullable: true
+          description: Trend over last 5 sessions (improving, stable, declining)
+        strengths:
+          type: array
+          items:
+            type: string
+        areasToImprove:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - preferredGenres
+        - totalSessions
+        - totalRecordings
+        - strengths
+        - areasToImprove
+        - createdAt
+        - updatedAt
+
+    UpdateVocalProfileBody:
+      type: object
+      properties:
+        preferredGenres:
+          type: array
+          items:
+            type: string
+        voiceType:
+          type: string
+          nullable: true
+        skillLevel:
+          type: string
+          nullable: true
