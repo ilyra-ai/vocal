@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useLocation } from "wouter";
-import { Plus, Music, Search } from "lucide-react";
+import { Plus, Music, Search, X } from "lucide-react";
 import { useListVocalSessions, useCreateVocalSession } from "@workspace/api-client-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -10,9 +10,20 @@ export default function Sessions() {
   const [, setLocation] = useLocation();
   const { data: sessions, isLoading, refetch } = useListVocalSessions();
   const createSession = useCreateVocalSession();
-  
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const [formData, setFormData] = useState({ title: "", genre: "Pop", targetSong: "", skillLevel: "Intermediário" });
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return sessions;
+    const q = search.toLowerCase();
+    return sessions?.filter(s =>
+      s.title.toLowerCase().includes(q) ||
+      s.genre.toLowerCase().includes(q) ||
+      (s.targetSong?.toLowerCase().includes(q) ?? false)
+    );
+  }, [sessions, search]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +44,7 @@ export default function Sessions() {
           <h1 className="text-3xl font-bold text-white">Sessões</h1>
           <p className="text-muted-foreground mt-1">Gerencie e revise seu histórico de prática</p>
         </div>
-        <button 
+        <button
           onClick={() => setIsDialogOpen(true)}
           className="flex items-center px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-transform active:scale-95"
         >
@@ -42,21 +53,46 @@ export default function Sessions() {
         </button>
       </div>
 
-      <div className="glass-panel p-2 rounded-2xl mb-8 flex items-center max-w-md">
-        <Search className="w-5 h-5 text-muted-foreground ml-3 mr-2" />
-        <input 
+      <div className="glass-panel p-2 rounded-2xl mb-8 flex items-center max-w-md relative">
+        <Search className="w-5 h-5 text-muted-foreground ml-3 mr-2 shrink-0" />
+        <input
           type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
           placeholder="Buscar sessões..."
           className="bg-transparent border-none outline-none text-white w-full py-2 placeholder:text-muted-foreground"
         />
+        {search && (
+          <button onClick={() => setSearch("")} className="mr-2 text-muted-foreground hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center text-muted-foreground">Carregando...</div>
+      ) : filtered?.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-center py-16 glass-panel rounded-2xl">
+          <Music className="w-14 h-14 text-muted-foreground/30 mx-auto mb-4" />
+          <p className="text-xl text-white font-medium mb-2">
+            {search ? `Nenhum resultado para "${search}"` : "Nenhuma sessão ainda"}
+          </p>
+          <p className="text-muted-foreground mb-6">
+            {search ? "Tente buscar por outro título ou gênero." : "Crie sua primeira sessão para começar a praticar."}
+          </p>
+          {!search && (
+            <button
+              onClick={() => setIsDialogOpen(true)}
+              className="px-6 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition-colors"
+            >
+              Criar Sessão
+            </button>
+          )}
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {sessions?.map((session, i) => (
-            <motion.div 
+          {filtered?.map((session, i) => (
+            <motion.div
               key={session.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -78,7 +114,6 @@ export default function Sessions() {
                   {session.targetSong && (
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-1">🎵 {session.targetSong}</p>
                   )}
-                  
                   <div className="mt-auto pt-4 border-t border-border flex justify-between items-center text-xs text-muted-foreground">
                     <span>{format(new Date(session.createdAt), "d 'de' MMM, yyyy", { locale: ptBR })}</span>
                     <span>{session.recordingCount} gravações</span>
@@ -90,10 +125,9 @@ export default function Sessions() {
         </div>
       )}
 
-      {/* Diálogo de Criação */}
       {isDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="glass-panel w-full max-w-md rounded-3xl p-8"
@@ -102,19 +136,19 @@ export default function Sessions() {
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">Título da Sessão</label>
-                <input 
+                <input
                   required
                   value={formData.title}
-                  onChange={e => setFormData({...formData, title: e.target.value})}
-                  className="w-full bg-input border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" 
-                  placeholder="ex.: Prática de Notas Altas" 
+                  onChange={e => setFormData({ ...formData, title: e.target.value })}
+                  className="w-full bg-input border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="ex.: Prática de Notas Altas"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">Gênero</label>
-                <select 
+                <select
                   value={formData.genre}
-                  onChange={e => setFormData({...formData, genre: e.target.value})}
+                  onChange={e => setFormData({ ...formData, genre: e.target.value })}
                   className="w-full bg-input border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   {['Pop', 'Clássico', 'Jazz', 'Ópera', 'Rock', 'R&B', 'Teatro Musical', 'MPB', 'Sertanejo', 'Forró'].map(g => (
@@ -126,7 +160,7 @@ export default function Sessions() {
                 <label className="block text-sm font-medium text-muted-foreground mb-1">Nível de Habilidade</label>
                 <select
                   value={formData.skillLevel}
-                  onChange={e => setFormData({...formData, skillLevel: e.target.value})}
+                  onChange={e => setFormData({ ...formData, skillLevel: e.target.value })}
                   className="w-full bg-input border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   {['Iniciante', 'Intermediário', 'Avançado', 'Profissional'].map(s => (
@@ -136,23 +170,23 @@ export default function Sessions() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">Música-Alvo (Opcional)</label>
-                <input 
+                <input
                   value={formData.targetSong}
-                  onChange={e => setFormData({...formData, targetSong: e.target.value})}
-                  className="w-full bg-input border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" 
-                  placeholder="ex.: Evidências – Chitãozinho & Xororó" 
+                  onChange={e => setFormData({ ...formData, targetSong: e.target.value })}
+                  className="w-full bg-input border border-border rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="ex.: Evidências – Chitãozinho & Xororó"
                 />
               </div>
               <div className="pt-4 flex gap-3">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setIsDialogOpen(false)}
                   className="flex-1 py-3 px-4 rounded-xl bg-secondary text-white font-medium hover:bg-secondary/80"
                 >
                   Cancelar
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={createSession.isPending}
                   className="flex-1 py-3 px-4 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 disabled:opacity-50"
                 >

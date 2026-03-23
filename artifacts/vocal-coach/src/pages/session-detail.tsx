@@ -1,16 +1,32 @@
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { Mic2, ArrowLeft, Trash2, Calendar, FileAudio } from "lucide-react";
 import { useGetVocalSession, useDeleteVocalSession } from "@workspace/api-client-react";
 import { ScoreDial } from "@/components/score-dial";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useState } from "react";
 
 export default function SessionDetail() {
   const { id } = useParams();
+  const [, setLocation] = useLocation();
   const sessionId = parseInt(id || "0", 10);
-  
+
   const { data: session, isLoading } = useGetVocalSession(sessionId);
   const deleteMutation = useDeleteVocalSession();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const handleDelete = async () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    try {
+      await deleteMutation.mutateAsync({ id: sessionId });
+      setLocation("/sessions");
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (isLoading) return <div className="p-8 text-white">Carregando...</div>;
   if (!session) return <div className="p-8 text-white">Sessão não encontrada.</div>;
@@ -26,7 +42,7 @@ export default function SessionDetail() {
             <h1 className="text-4xl font-bold text-white mb-2">{session.title}</h1>
             <div className="flex items-center space-x-4 text-sm text-muted-foreground">
               <span className="flex items-center">
-                <Calendar className="w-4 h-4 mr-1"/>
+                <Calendar className="w-4 h-4 mr-1" />
                 {format(new Date(session.createdAt), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
               </span>
               <span className="px-2 py-0.5 rounded bg-primary/20 text-primary font-medium">{session.genre}</span>
@@ -34,10 +50,30 @@ export default function SessionDetail() {
             </div>
           </div>
           <div className="flex gap-3">
-            <button className="p-3 rounded-xl bg-secondary text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
-              <Trash2 className="w-5 h-5" />
+            <button
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+              className={`px-4 py-3 rounded-xl font-medium text-sm transition-colors flex items-center gap-2 ${
+                confirmDelete
+                  ? "bg-destructive text-white hover:bg-destructive/90"
+                  : "bg-secondary text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              }`}
+            >
+              <Trash2 className="w-4 h-4" />
+              {deleteMutation.isPending ? "Deletando..." : confirmDelete ? "Confirmar exclusão" : "Deletar"}
             </button>
-            <Link href={`/studio?sessionId=${session.id}`} className="flex items-center px-6 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/20">
+            {confirmDelete && (
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-4 py-3 rounded-xl bg-secondary text-muted-foreground hover:text-white text-sm font-medium"
+              >
+                Cancelar
+              </button>
+            )}
+            <Link
+              href={`/studio?sessionId=${session.id}`}
+              className="flex items-center px-6 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 shadow-lg shadow-primary/20"
+            >
               <Mic2 className="w-5 h-5 mr-2" />
               Nova Gravação
             </Link>
@@ -64,7 +100,7 @@ export default function SessionDetail() {
                   {format(new Date(rec.createdAt), "HH:mm", { locale: ptBR })} • {Math.round(rec.durationSeconds)}s
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-10">
                 <ScoreDial score={rec.pitchAccuracyScore || 0} label="Tom" />
                 <ScoreDial score={rec.intonationScore || 0} label="Entonação" />
@@ -83,7 +119,7 @@ export default function SessionDetail() {
                     <p>{rec.aiAnalysis || "Análise pendente..."}</p>
                   </div>
                 </div>
-                
+
                 <div className="space-y-6">
                   {rec.keyIssues && rec.keyIssues.length > 0 && (
                     <div>
@@ -97,7 +133,7 @@ export default function SessionDetail() {
                       </ul>
                     </div>
                   )}
-                  
+
                   {rec.recommendations && rec.recommendations.length > 0 && (
                     <div>
                       <h4 className="text-sm font-bold text-accent uppercase tracking-wider mb-3">Recomendações</h4>
