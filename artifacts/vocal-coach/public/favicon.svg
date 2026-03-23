@@ -1,3 +1,9 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="16" fill="#1a0a2e"/>
+  <rect x="24" y="10" width="16" height="26" rx="8" fill="#7c3aed"/>
+  <path d="M18 34c0 7.732 6.268 14 14 14s14-6.268 14-14" stroke="#a78bfa" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <line x1="32" y1="48" x2="32" y2="56" stroke="#a78bfa" stroke-width="3" stroke-linecap="round"/>
+  <line x1="23" y1="56" x2="41" y2="56" stroke="#a78bfa" stroke-width="3" stroke-linecap="round"/>
+  <line x1="24" y1="22" x2="40" y2="22" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+  <line x1="24" y1="27" x2="40" y2="27" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
 </svg>

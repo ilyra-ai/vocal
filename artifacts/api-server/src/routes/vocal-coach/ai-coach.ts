@@ -53,7 +53,9 @@ Format your response as a complete clinical analysis with sections:
 4. Resonance & Tone Quality
 5. Technical Issues Identified (numbered list)
 6. Personalized Exercise Protocol (numbered, with specific pitches/durations)
-7. Prognosis & Next Session Focus`;
+7. Prognosis & Next Session Focus
+
+IMPORTANT: Always respond entirely in Brazilian Portuguese (pt-BR). All analysis, exercises, terminology explanations, and feedback must be written in Portuguese.`;
 }
 
 export function buildVocalCoachAnalysisPrompt(ctx: CoachingContext): string {
